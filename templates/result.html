@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+<head>
+<script type="text/javascript">
+function myFunction(){
+window.location.href = 'http://localhost:5000/read';
+}
+</script>
+   <body>
+         There are {{reslen}} chapters available:<br>
+	 {% for lol in range(0,reslen) %}
+		<a href="{{result[lol]+"/1.html"}}">Chapter {{lol+1}}</a><br>
+         {% endfor %}
+	 {{chapno}}
+	 <form action = "http://localhost:5000/read" method = "POST">
+  	 Enter no: <input type="text" name="num">
+  	 <input type="submit" value="submit">
+</form>
+   </body>
+</html>
