@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request
-import urllib, re,sys,requests
-reload(sys)
-sys.setdefaultencoding('utf8')
+from bs4 import BeautifulSoup
+import urllib, re,requests
 app = Flask(__name__)
 a=[]
 lol=1;
@@ -15,31 +14,61 @@ def result():
 	if request.method == 'POST':
 		result = request.form['Manga']
 		if result=="OPM":
-			source = urllib.urlopen('http://mangafox.me/manga/onepunch_man/').read()
-			for link in re.findall('http://mangafox.me/manga/onepunch_man/v[0-9][0-9]/c\d\d\d', source):
-				a.append(link)
-			for link in re.findall('http://mangafox.me/manga/onepunch_man/vTBD/c\d\d\d', source):
-				a.append(link)
-	return render_template("result.html",result = a,reslen=len(a))
+			source = requests.get('http://mangafox.me/manga/onepunch_man/v01/c001/1.html')
+			soup = BeautifulSoup(source.text)
+			h=soup.findAll('option')
+			l=[]
+			t=[]
+			source2 = requests.get('http://mangafox.me/manga/onepunch_man')
+			soup2 = BeautifulSoup(source2.text)
+			for div in soup2.findAll("ul", { "class" : "chlist" }):
+				for h3 in div.findAll("h3"):
+					for link in h3.select("a"):
+						l.append(link['href'])
+						t.append(link.contents[0])
+			for div in soup2.findAll("ul", { "class" : "chlist" }):
+				for h3 in div.findAll("h4"):
+					for link in h3.select("a"):
+						l.append(link['href'])
+						t.append(link.contents[0])
+			
+			a = [str(r) for r in l]
+			t = [str(r) for r in t]
+	return render_template("result.html",chaplink = a,chapno=t,chaplen=len(t))
 
-@app.route('/read',methods = ['POST' , 'GET'])
-def read():
-	if request.method == 'POST':
-		lel = request.form['num']
-		b=[]
-		source=''
-		source = requests.get('http://mangafox.me/manga/onepunch_man/').text
-		for link in re.findall('http://mangafox.me/manga/onepunch_man/v[0-9][0-9]/c\d\d\d', source):
-			b.append(link)
-		for link in re.findall('http://mangafox.me/manga/onepunch_man/vTBD/c\d\d\d', source):
-			b.append(link)
-		for pno in range(1,16):
-			aba=next((s for s in b if str(lel) in s), None)
-			aba+='/'+str(pno)
-			mpage=urllib.urlopen(aba).read()
-			c=re.findall('http://l.mfcdn.net/store/manga/11362/[0-9].+', mpage)
-        		d="".join(c)
-			d=d[:119]
-	return render_template("read.html",reads=source,ilag=c,page=aba,sc=mpage)
+@app.route('/read/<clink>',methods = ['POST' , 'GET'])
+def read(clink):
+	source2 = requests.get('http://mangafox.me/manga/onepunch_man')
+	soup2 = BeautifulSoup(source2.text)
+	l=[]
+	z=-2
+	for div in soup2.findAll("ul", { "class" : "chlist" }):
+		for h3 in div.findAll("h3"):
+			for link in h3.select("a"):
+				l.append(link['href'])
+	for div in soup2.findAll("ul", { "class" : "chlist" }):
+		for h3 in div.findAll("h4"):
+			for link in h3.select("a"):
+				l.append(link['href'])
+			
+			a = [str(r) for r in l]
+	if 1==1:
+		c=[]
+		g=a[int(clink)][:-5]
+		source = requests.get(g)
+		soup = BeautifulSoup(source.text)
+		for h in soup.findAll('select',{'class':'m'}):
+			for i in h.findAll('option'):
+				z=z+1
+		z=z/2
+		for i in range(0,z):
+			j=g[:-1]
+			j=j+str(i+1)+".html"
+			source3 = requests.get(j)
+			soup3 = BeautifulSoup(source3.text)
+			b=soup3.find("img")
+			c.append(b["src"])
+		x=[str(r) for r in c]
+	return render_template("read.html",imgl=x,pgno=z)
 if __name__ == '__main__':
    app.run(debug = True)
