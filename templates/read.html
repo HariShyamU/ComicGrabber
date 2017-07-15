@@ -1,6 +1,10 @@
 <html>
+<head>
+</head>
 <body>
-{{reads}}
-
+	
+	{% for i in range(0,pgno) %}
+		<center><img src="{{imgl[i]}}"></center>
+	{% endfor %}
 </body>
 </html>

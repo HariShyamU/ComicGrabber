@@ -7,14 +7,12 @@ window.location.href = 'http://localhost:5000/read';
 }
 </script>
    <body>
-         There are {{reslen}} chapters available:<br>
-	 {% for lol in range(0,reslen) %}
-		<a href="{{result[lol]+"/1.html"}}">Chapter {{lol+1}}</a><br>
-         {% endfor %}
-	 {{chapno}}
-	 <form action = "http://localhost:5000/read" method = "POST">
-  	 Enter no: <input type="text" name="num">
-  	 <input type="submit" value="submit">
+         There are {{chaplen}} chapters available:
+	{% for lol in range(0,chaplen) %}
+		<br>
+		{{img}}
+		<form action = "http://localhost:5000/read/{{lol}}" method = "POST"><button type="submit">{{chapno[lol]}}</button></form></a>
+	{% endfor %}
 </form>
    </body>
 </html>
